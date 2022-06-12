@@ -8,6 +8,7 @@ import * as fileSyst from "./modules/fileSyst.js";
 import { showMsgFailOperation } from "./modules/share.js";
 import { OperSyst } from "./modules/os.js";
 import calculateHash from "./modules/hash.js";
+import { compressFile } from "./modules/zip/compress.js";
 
 const args = process.argv.slice(2);
 
@@ -49,6 +50,9 @@ process.stdin.on('data', async data => {
                     showMsgFailOperation('wrong path');
                 })
 
+            break;
+        case 'compress':
+            await compressFile(dir, arr.slice(1));
             break;
         case 'cp':
             await copyFile(arr);

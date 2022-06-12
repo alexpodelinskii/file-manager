@@ -1,10 +1,17 @@
 import fs from 'fs/promises'
 import { createReadStream } from 'fs'
-import path from "path";
+import path, { join } from "path";
 import { showMsgFailOperation } from './share.js';
 
 
-export function createFile(pathToFile) {
+export async function createFile(pathToFile) {
+    const dirname = path.dirname(pathToFile);
+
+    await isCorrectPath(dirname)
+        .catch(() => {
+            createDir(dirname)
+        });
+
     fs.writeFile(pathToFile, '')
         .then(() => {
             console.log('The file was create');
@@ -67,4 +74,25 @@ export function copyFile(arr) {
         .catch((err) => {
             showMsgFailOperation(`wrong path`)
         })
+}
+export async function createDir(pathToDir) {
+
+    const arr = pathToDir.split(path.sep);
+    arr.reduce((acc, el) => {
+
+        acc = path.join(acc, el)
+
+        isCorrectPath(acc)
+            .catch(async () => {
+                await fs.mkdir(acc)
+            })
+
+        return acc
+    })
+    await isCorrectPath(pathToDir)
+        .catch(() => { })
+
+    return await Promise.resolve(2)
+
+
 }
