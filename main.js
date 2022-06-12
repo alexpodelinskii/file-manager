@@ -9,6 +9,7 @@ import { showMsgFailOperation } from "./modules/share.js";
 import { OperSyst } from "./modules/os.js";
 import calculateHash from "./modules/hash.js";
 import { compressFile } from "./modules/zip/compress.js";
+import { decompressFile } from "./modules/zip/decompress.js";
 
 const args = process.argv.slice(2);
 
@@ -56,6 +57,9 @@ process.stdin.on('data', async data => {
             break;
         case 'cp':
             await copyFile(arr);
+            break;
+        case 'decompress':
+            await decompressFile(dir, arr.slice(1));
             break;
         case 'hash':
             await calculateHash(path.resolve(dir, arg.trim()));
