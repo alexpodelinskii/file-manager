@@ -1,0 +1,20 @@
+{
+  "name": "file-manager",
+  "version": "1.0.0",
+  "description": "task node js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexpodelinskii/file-manager.git"
+  },
+  "author": "Alex Podelinskii",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexpodelinskii/file-manager/issues"
+  },
+  "homepage": "https://github.com/alexpodelinskii/file-manager#readme"
+}
