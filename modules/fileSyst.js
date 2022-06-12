@@ -23,21 +23,30 @@ export async function createFile(pathToFile) {
 export async function renameFile(dir, arr) {
     const [sorceFfilePath, targetFileName] = arr.slice(1);
     const sorce = path.resolve(dir, sorceFfilePath);
-    const targetDirr = path.dirname(sorce);
-    const target = path.resolve(targetDirr, targetFileName);
+    await isCorrectPath(sorce)
+        .then(async () => {
+            const targetDirr = path.dirname(sorce);
 
-    const read = createReadStream(sorce);
-    const write = createWriteStream(target);
+            const target = path.resolve(targetDirr, targetFileName);
 
-    await new Promise((resolve, reject) => {
-        const stream = read.pipe(write);
+            const read = createReadStream(sorce);
+            const write = createWriteStream(target);
 
-        stream.on('finish', () => {
-            console.log('Rename complete');
-            resolve()
-        });
-    });
-    await removeFile(sorce);
+            await new Promise((resolve, reject) => {
+                const stream = read.pipe(write);
+
+                stream.on('finish', () => {
+                    console.log('Rename complete');
+                    resolve()
+                });
+            });
+            await removeFile(sorce);
+        })
+        .catch(() => {
+            showMsgFailOperation('file not found');
+        })
+
+
 }
 
 export async function ReadFile(pathToFile) {
