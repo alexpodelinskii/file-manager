@@ -10,6 +10,7 @@ import { OperSyst } from "./modules/os.js";
 import calculateHash from "./modules/hash.js";
 import { compressFile } from "./modules/zip/compress.js";
 import { decompressFile } from "./modules/zip/decompress.js";
+import { changeDirr, logListFiles, upToDirr } from "./modules/nwd.js";
 
 const args = process.argv.slice(2);
 
@@ -44,19 +45,14 @@ process.stdin.on('data', async data => {
             break;
 
         case 'cd':
-            const newDir = path.resolve(dir, arg.trim())
-            await fileSyst.isCorrectPath(newDir)
-                .then(() => dir = newDir)
-                .catch((err) => {
-                    showMsgFailOperation('wrong path');
-                })
+            await changeDirr(dir, arg).then(res => dir = res)
 
             break;
         case 'compress':
             await compressFile(dir, arr.slice(1));
             break;
         case 'cp':
-            await copyFile(arr);
+            await fileSyst.copyFile(dir, arr);
             break;
         case 'decompress':
             await decompressFile(dir, arr.slice(1));
@@ -65,7 +61,7 @@ process.stdin.on('data', async data => {
             await calculateHash(path.resolve(dir, arg.trim()));
             break;
         case 'ls':
-            await fileSyst.logListFiles(dir);
+            await logListFiles(dir);
             break;
         case 'os':
             await OperSyst(arr);
@@ -74,7 +70,7 @@ process.stdin.on('data', async data => {
             await fileSyst.renameFile(dir, arr);
             break;
         case 'up':
-            dir = path.dirname(dir);
+            dir = upToDirr(dir);
             break;
 
 

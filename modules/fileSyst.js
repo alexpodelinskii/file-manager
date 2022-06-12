@@ -1,5 +1,5 @@
 import fs from 'fs/promises'
-import { createReadStream } from 'fs'
+import { createReadStream, createWriteStream, rm } from 'fs'
 import path, { join } from "path";
 import { showMsgFailOperation } from './share.js';
 
@@ -8,31 +8,41 @@ export async function createFile(pathToFile) {
     const dirname = path.dirname(pathToFile);
 
     await isCorrectPath(dirname)
-        .catch(() => {
-            createDir(dirname)
+        .catch(async () => {
+            await createDir(dirname)
         });
+    const stream = createWriteStream(pathToFile)
+    stream.write('')
+    stream.on('error', () => {
+        showMsgFailOperation(`can't create file`)
+    })
+    console.log('The file was create');
+    stream.close()
 
-    fs.writeFile(pathToFile, '')
-        .then(() => {
-            console.log('The file was create');
-        })
-        .catch(() => {
-            showMsgFailOperation(`can't create file`);
-        })
 }
-export function renameFile(dir, arr) {
+
+
+export async function renameFile(dir, arr) {
     const [sorceFfilePath, targetFileName] = arr.slice(1);
     const sorce = path.resolve(dir, sorceFfilePath);
     const targetDirr = path.dirname(sorce);
     const target = path.resolve(targetDirr, targetFileName);
-    fs.rename(sorce, target)
-        .then(() => {
+
+    const read = createReadStream(sorce);
+    const write = createWriteStream(target);
+
+    await new Promise((resolve, reject) => {
+        const stream = read.pipe(write);
+
+        stream.on('finish', () => {
             console.log('Rename complete');
-        })
-        .catch(() => {
-            showMsgFailOperation(`can't rename file`)
-        })
+            resolve()
+        });
+    });
+    rm(sorce, () => { })
+
 }
+
 export async function ReadFile(pathToFile) {
     let content = '';
 
@@ -40,7 +50,6 @@ export async function ReadFile(pathToFile) {
         .then(async () => {
             const fd = await fs.open(pathToFile)
             await new Promise((resolve, reject) => {
-
                 fd.createReadStream()
                     .on('data', data => content += data)
                     .on('end', () => {
@@ -54,26 +63,49 @@ export async function ReadFile(pathToFile) {
         })
 }
 
-export function logListFiles(dir) {
-    return fs.readdir(dir)
-        .then((res) => {
-            console.log(res);
-        })
 
-}
 export function isCorrectPath(path) {
     return fs.access(path)
 }
 
-export function copyFile(arr) {
-    const [sorce, target] = arr.slice(1);
-    fs.copyFile(path.resolve(dir, sorce), path.resolve(dir, target))
-        .then(() => {
-            console.log('The file copied');
+export async function copyFile(dir, arr) {
+    let [sorce, targetDirr] = arr.slice(1);
+    sorce = path.resolve(dir, sorce)
+    await isCorrectPath(sorce)
+        .then(async () => {
+            targetDirr = path.resolve(dir, targetDirr)
+            if (path.extname(targetDirr) !== '') {
+                targetDirr = removeExt(targetDirr);
+            }
+
+            const fileName = path.basename(sorce);
+            const target = path.join(targetDirr, fileName)
+            await isCorrectPath(targetDirr)
+                .catch(async () => {
+                    await createDir(targetDirr)
+
+                })
+            await isCorrectPath(targetDirr)
+                .catch(async () => {
+
+
+                })
+            const read = createReadStream(sorce);
+            const write = createWriteStream(target);
+            await new Promise((resolve, reject) => {
+                const stream = read.pipe(write);
+
+                stream.on('finish', () => {
+                    console.log('The file copied');
+                    resolve()
+                });
+            });
+
         })
         .catch((err) => {
-            showMsgFailOperation(`wrong path`)
+            showMsgFailOperation('file not found');
         })
+
 }
 export async function createDir(pathToDir) {
 
@@ -95,4 +127,9 @@ export async function createDir(pathToDir) {
     return await Promise.resolve(2)
 
 
+}
+function removeExt(pathWithExt) {
+    const ext = path.extname(pathWithExt);
+    const ind = pathWithExt.indexOf(ext);
+    return pathWithExt.slice(0, ind)
 }
