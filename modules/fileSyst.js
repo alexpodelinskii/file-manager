@@ -18,9 +18,7 @@ export async function createFile(pathToFile) {
     })
     console.log('The file was create');
     stream.close()
-
 }
-
 
 export async function renameFile(dir, arr) {
     const [sorceFfilePath, targetFileName] = arr.slice(1);
@@ -39,8 +37,7 @@ export async function renameFile(dir, arr) {
             resolve()
         });
     });
-    rm(sorce, () => { })
-
+    await removeFile(sorce);
 }
 
 export async function ReadFile(pathToFile) {
@@ -107,6 +104,66 @@ export async function copyFile(dir, arr) {
         })
 
 }
+export async function moveFile(dir, arr) {
+    let [sorce, targetDirr] = arr.slice(1);
+    sorce = path.resolve(dir, sorce)
+    await isCorrectPath(sorce)
+        .then(async () => {
+            targetDirr = path.resolve(dir, targetDirr)
+            if (path.extname(targetDirr) !== '') {
+                targetDirr = removeExt(targetDirr);
+            }
+
+            const fileName = path.basename(sorce);
+            const target = path.join(targetDirr, fileName)
+            await isCorrectPath(targetDirr)
+                .catch(async () => {
+                    await createDir(targetDirr)
+
+                })
+            await isCorrectPath(targetDirr)
+                .catch(async () => {
+
+
+                })
+            const read = createReadStream(sorce);
+            const write = createWriteStream(target);
+            await new Promise((resolve, reject) => {
+                const stream = read.pipe(write);
+
+                stream.on('finish', () => {
+                    removeFile(sorce)
+                    console.log('The file moved');
+                    resolve()
+                });
+            });
+
+        })
+        .catch((err) => {
+            showMsgFailOperation('file not found');
+        })
+
+}
+
+export async function deleteFile(dir, arr) {
+    let [, sorce] = arr;
+    sorce = path.resolve(dir, sorce)
+    await removeFile(sorce)
+
+}
+
+async function removeFile(pathForRemove) {
+    await isCorrectPath(pathForRemove)
+        .then(async () => {
+            await rm(pathForRemove, () => { })
+        })
+        .catch(() => {
+            showMsgFailOperation('wrong path');
+        })
+
+
+}
+
 export async function createDir(pathToDir) {
 
     const arr = pathToDir.split(path.sep);

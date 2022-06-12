@@ -63,8 +63,14 @@ process.stdin.on('data', async data => {
         case 'ls':
             await logListFiles(dir);
             break;
+        case 'mv':
+            await fileSyst.moveFile(dir, arr);
+            break;
         case 'os':
             await OperSyst(arr);
+            break;
+        case 'rm':
+            await fileSyst.deleteFile(dir, arr);
             break;
         case 'rn':
             await fileSyst.renameFile(dir, arr);

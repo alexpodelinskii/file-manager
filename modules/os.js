@@ -34,7 +34,9 @@ function showCpusInfo() {
     const cpus = os.cpus();
     console.log(`Your host machine have ${cpus.length} cpus`);
     cpus.forEach((cpu, index) => {
-        console.log(`Your CPU ${index + 1} info:  ${cpu.model}`);
+        console.log(`
+    Your CPU ${index + 1} model:  ${cpu.model}
+    Your CPU ${index + 1} clock rate:  ${+cpu.speed / 1000} GHz`);
     })
 
 }
